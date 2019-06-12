@@ -13,4 +13,4 @@ script:
   - echo 0
 after_success:
   - docker push registry.heroku.com/${HEROKU_APP_NAME}/web
-  - heroku container:releas web --app ${HEROKU_APP_NAME}
+  - heroku container:release web --app ${HEROKU_APP_NAME}
