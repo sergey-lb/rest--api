@@ -1,0 +1,16 @@
+dist: xenial
+language: python
+python:
+  - "3.7"
+env:
+  - HEROKU_APP_NAME=rest--api
+services:
+  - docker
+before_script:
+  - docker login --username=_ --password=${HEROKU_API_KEY} registry.heroku.com
+  - docker build -t registry.heroku.com/${HEROKU_APP_NAME}/web .
+script:
+  - echo 0
+after_success:
+  - docker push registry.heroku.com/${HEROKU_APP_NAME}/web
+  - heroku container:releas web --app ${HEROKU_APP_NAME}

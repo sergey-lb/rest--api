@@ -1,0 +1,23 @@
+version: '3'
+services:
+  app:  # это имя моего сервиса
+    image: rest  # имя, которое будет сгенерировано при build'е
+    build: .
+    container_name: rest
+    ports:
+      - '9876:9876'
+    links:
+      - db
+    volumes:
+      - /opt/app/venv
+      - .:/opt/app
+  db:
+    image: postgres:11-alpine
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    environment:
+      - POSTGRES_PASSWORD=Et4%gfdg##^f99h
+      - POSTGRES_USER=rest
+      - POSTGRES_DB=rest
