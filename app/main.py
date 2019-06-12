@@ -5,23 +5,23 @@ from flask import Flask, render_template, request, jsonify
 from app.db import Db
 from urllib.parse import urlparse
 
-# if 'DATABASE_URL' in os.environ:
-#     conf = urlparse(os.environ['DATABASE_URL'])
-#     DB_CONF = {
-#         'db': conf.path[1:],
-#         'user': conf.username ,
-#         'pass': conf.password ,
-#         'host': conf.hostname,
-#         'port': conf.port
-#     }
-# else:
-DB_CONF = {
-    'db': 'rest',
-    'user': 'rest',
-    'pass': 'Et4%gfdg##^f99h',
-    'host': '127.0.0.1',
-    'port': '5432'
-}
+if 'DATABASE_URL' in os.environ:
+    conf = urlparse(os.environ['DATABASE_URL'])
+    DB_CONF = {
+        'db': conf.path[1:],
+        'user': conf.username ,
+        'pass': conf.password ,
+        'host': conf.hostname,
+        'port': conf.port
+    }
+else:
+    DB_CONF = {
+        'db': 'rest',
+        'user': 'rest',
+        'pass': 'Et4%gfdg##^f99h',
+        'host': '192.168.99.100',
+        'port': '5432'
+    }
 
 def start():
     app = Flask(__name__)
