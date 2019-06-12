@@ -8,9 +8,9 @@ from urllib.parse import urlparse
 if 'DATABASE_URL' in os.environ:
     conf = urlparse(os.environ['DATABASE_URL'])
     DB_CONF = {
-        'db': 'rest',
-        'user': 'rest',
-        'pass': 'Et4%gfdg##^f99h',
+        'db': conf.path[1:],
+        'user': conf.username ,
+        'pass': conf.password ,
         'host': conf.hostname,
         'port': conf.port
     }
