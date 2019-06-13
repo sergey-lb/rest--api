@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 
 class Db:
 
@@ -13,7 +13,7 @@ class Db:
             password=self._conf['pass'],
             host=self._conf['host'],
             port=self._conf['port'],
-            cursor_factory=DictCursor
+            cursor_factory=RealDictCursor
         )
         return db
 
@@ -73,6 +73,18 @@ class Db:
             items = cursor.fetchall()
             return items
 
+    def find_by_column_in(self, table, *, column, values, sorting=None):
+        self.validate_table_or_column_name(table)
+        self.validate_table_or_column_name(column)
+        values = tuple(values)
+        with self._open_db() as db:
+            sql = f"SELECT * FROM {table} WHERE {column} IN %(values)s"
+            sql = self._add_sorting_part(sql, sorting)
+            cursor = db.cursor()
+            cursor.execute(sql, {'values': values})
+            items = cursor.fetchall()
+            return items
+
     def find_by_column_like(self, table, *, column, value, sorting=None):
         self.validate_table_or_column_name(table)
         self.validate_table_or_column_name(column)
@@ -89,13 +101,13 @@ class Db:
             if type(item) is not dict:
                 item = item.__dict__
 
-            cols_str = ",".join(item.keys()) + ", counter"
-            vals_str = "%(" + ")s, %(:".join(item.keys()) + ')s'
-            vals_str += f", (SELECT ifnull(MAX(counter),0)+1 FROM {table})"
-            sql = f"INSERT INTO {table} ({cols_str}) VALUES({vals_str})"
+            cols_str = ",".join(item.keys())
+            vals_str = "%(" + ")s, %(".join(item.keys()) + ')s'
+            sql = f"INSERT INTO {table} ({cols_str}) VALUES({vals_str}) RETURNING id"
             cursor = db.cursor()
             cursor.execute(sql, item)
-            return cursor.lastrowid
+            insert_id = cursor.fetchone()
+            return insert_id['id']
 
     def update(self, table, item):
         self.validate_table_or_column_name(table)

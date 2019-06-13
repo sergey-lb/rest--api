@@ -17,6 +17,7 @@ services:
       - '5432:5432'
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
     environment:
       - POSTGRES_PASSWORD=Et4%gfdg##^f99h
       - POSTGRES_USER=rest

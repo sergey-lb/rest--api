@@ -44,6 +44,7 @@ def start():
     def save_user():
         data = request.get_json()
         if data['id'] == 0:
+            del data['id']
             db.insert('users', data)
             return '', 200
 
@@ -61,9 +62,9 @@ def start():
         db.delete('users', user_id)
         return '', 200
 
-    @app.route('/api/api/users/<int:user_id>/projects', methods=['GET'])
+    @app.route('/api/users/<int:user_id>/projects', methods=['GET'])
     def get_users_projects(user_id):
-        projects = db.find_by_column('projects', 'user_id', user_id)
+        projects = db.find_by_column('projects', column='owner_id', value=user_id)
         return jsonify(projects)
 
     @app.route('/api/users/<int:user_id>/projects/<int:project_id>', methods=['GET'])
@@ -80,6 +81,7 @@ def start():
         if data['id'] == 0:
             if not db.find('users', user_id):
                 return '', 404
+            del data['id']
             data['owner_id'] = user_id
             db.insert('projects', data)
             return '', 200
@@ -114,6 +116,49 @@ def start():
             "owner_id": user_id,
             "project_id": project_id
         }).fetchall()
+
+        if not len(issues):
+            return jsonify(issues)
+
+        issue_ids = []
+        for issue in issues:
+            issue_ids.append(issue['id'])
+
+        sorting = {
+            'column': 'label',
+            'order': 'ASC'
+        }
+
+        labels = db.find_by_column_in('labels', column='issue_id', values=issue_ids, sorting=sorting)
+        labels_by_issue_id = {}
+        for label in labels:
+            if not label['issue_id'] in labels_by_issue_id:
+                labels_by_issue_id[label['issue_id']] = []
+            labels_by_issue_id[label['issue_id']].append(label['label'])
+
+        sorting = {
+            'column': 'user_id',
+            'order': 'ASC'
+        }
+
+        assignees = db.find_by_column_in('assignees', column='issue_id', values=issue_ids, sorting=sorting)
+        assignees_by_issue_id = {}
+        for assignee in assignees:
+            if not assignee['issue_id'] in assignees_by_issue_id:
+                assignees_by_issue_id[assignee['issue_id']] = []
+            assignees_by_issue_id[assignee['issue_id']].append(assignee['user_id'])
+
+        for issue in issues:
+            if issue['id'] in labels_by_issue_id:
+                issue['labels'] = labels_by_issue_id[issue['id']]
+            else:
+                issue['labels'] = []
+
+            if issue['id'] in assignees_by_issue_id:
+                issue['assignees'] = assignees_by_issue_id[issue['id']]
+            else:
+                issue['assignees'] = []
+
         return jsonify(issues)
 
     @app.route('/api/users/<int:user_id>/projects/<int:project_id>/issues/<int:issue_id>', methods=['GET'])
@@ -130,7 +175,27 @@ def start():
             "owner_id": user_id,
             "project_id": project_id,
             "issue_id": issue_id
-        }).fetchall()
+        }).fetchone()
+
+        sorting = {
+            'column': 'label',
+            'order': 'ASC'
+        }
+
+        labels = db.find_by_column('labels', column='issue_id', value=issue_id, sorting=sorting)
+        labels=list(map(lambda x: x['label'], labels))
+
+        sorting = {
+            'column': 'user_id',
+            'order': 'ASC'
+        }
+
+        assignees = db.find_by_column('assignees', column='issue_id', value=issue_id, sorting=sorting)
+        assignees = list(map(lambda x: x['user_id'], assignees))
+
+        issue['labels'] = labels
+        issue['assignees'] = assignees
+
         return jsonify(issue)
 
     @app.route('/api/users/<int:user_id>/projects/<int:project_id>/issues', methods=['POST'])
@@ -140,10 +205,16 @@ def start():
             return '', 404
 
         data = request.get_json()
+        data['author_id'] = user_id
+        data['project_id'] = project_id
+
+        data_to_save = data.copy()
+        del data_to_save['labels']
+        del data_to_save['assignees']
 
         if data['id'] == 0:
-            data['project_id'] = project_id
-            issue_id = db.insert('projects', data)
+            del data_to_save['id']
+            issue_id = db.insert('issues', data_to_save)
             if 'labels' in data:
                 save_labels(issue_id, data['labels'])
             if 'assignees' in data:
@@ -155,7 +226,7 @@ def start():
             return '', 404
 
         data['project_id'] = project_id
-        db.update('issues', data)
+        db.update('issues', data_to_save)
 
         if 'labels' in data:
             save_labels(data['id'], data['labels'])
@@ -184,19 +255,22 @@ def start():
             return '', 404
 
         db.delete('issues', issue_id)
+        return '', 200
 
     def save_labels(issue_id, labels):
-        db.raw("DELETE FROM labels WHERE issue_id = :issue_id", {"issue_id": issue_id})
+        db.raw("DELETE FROM labels WHERE issue_id = %(issue_id)s", {"issue_id": issue_id})
         for label in labels:
-            db.insert('labels', {
+            db.raw("INSERT INTO labels (issue_id, label) VALUES(%(issue_id)s, %(label)s)", {
                 "issue_id": issue_id,
                 "label": label
             })
 
     def save_assignees(issue_id, assignees):
-        db.raw("DELETE FROM assignees WHERE issue_id = :issue_id", {"issue_id": issue_id})
+        db.raw("DELETE FROM assignees WHERE issue_id = %(issue_id)s", {"issue_id": issue_id})
         for assignee in assignees:
-            db.insert('assignees', {
+            if not db.find('users', assignee):
+                continue
+            db.raw("INSERT INTO assignees (issue_id, user_id) VALUES(%(issue_id)s, %(user_id)s)", {
                 "issue_id": issue_id,
                 "user_id": assignee
             })

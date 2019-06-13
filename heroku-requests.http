@@ -1,0 +1,107 @@
+GET http://rest--api.herokuapp.com/api/users
+Accept: application/json
+
+###
+
+GET http://rest--api.herokuapp.com/api/users/1
+Accept: application/json
+
+###
+
+POST http://rest--api.herokuapp.com/api/users
+Content-Type: application/json
+
+{
+  "id": 0,
+  "name": "Petya"
+}
+
+###
+
+POST http://rest--api.herokuapp.com/api/users
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Kolya"
+}
+
+###
+
+DELETE http://rest--api.herokuapp.com/api/users/3
+
+###
+
+GET http://rest--api.herokuapp.com/api/users/1/projects
+Accept: application/json
+
+###
+
+GET http://rest--api.herokuapp.com/api/users/1/projects/1
+Accept: application/json
+
+###
+
+POST http://rest--api.herokuapp.com/api/users/1/projects
+Content-Type: application/json
+
+{
+  "id": 0,
+  "name": "Avito"
+}
+
+###
+
+POST http://rest--api.herokuapp.com/api/users/1/projects
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Ozon"
+}
+
+###
+
+DELETE http://rest--api.herokuapp.com/api/users/1/projects/3
+
+###
+
+GET http://rest--api.herokuapp.com/api/users/1/projects/1/issues
+Accept: application/json
+
+###
+
+GET http://rest--api.herokuapp.com/api/users/1/projects/1/issues/1
+Accept: application/json
+
+###
+
+POST http://rest--api.herokuapp.com/api/users/1/projects/1/issues
+Content-Type: application/json
+
+{
+  "id": 0,
+  "subject": "Add tests",
+  "content": "",
+  "labels": ["question"],
+  "assignees": [1,2]
+}
+
+###
+
+POST http://rest--api.herokuapp.com/api/users/1/projects/1/issues
+Content-Type: application/json
+
+{
+  "id": 1,
+  "subject": "Search doesn't work",
+  "content": "Search doesn't work when case is differs",
+  "labels": ["question"],
+  "assignees": [1,2]
+}
+
+###
+
+DELETE http://rest--api.herokuapp.com/api/users/1/projects/1/issues/2
+
+###

@@ -16,4 +16,5 @@ after_success:
   - heroku addons:create heroku-postgresql:hobby-dev --app ${HEROKU_APP_NAME}
   - heroku pg:reset --app rest--api --confirm rest--api
   - heroku pg:psql --app rest--api < schema.sql
+  - heroku pg:psql --app rest--api < data.sql
   - heroku container:release web --app ${HEROKU_APP_NAME}

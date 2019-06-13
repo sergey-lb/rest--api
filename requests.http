@@ -13,7 +13,7 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "name": "Вася"
+  "name": "Petya"
 }
 
 ###
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 {
   "id": 1,
-  "name": "Коля"
+  "name": "Kolya"
 }
 
 ###
@@ -81,9 +81,9 @@ Content-Type: application/json
 
 {
   "id": 0,
-  "name": "Не работает поиск",
+  "subject": "Add tests",
   "content": "",
-  "labels": ["вопрос"],
+  "labels": ["question"],
   "assignees": [1,2]
 }
 
@@ -94,9 +94,9 @@ Content-Type: application/json
 
 {
   "id": 1,
-  "name": "Не работает поиск",
-  "content": "Не работает поиск при несовпадении регистра",
-  "labels": ["вопрос"],
+  "subject": "Search doesn't work",
+  "content": "Search doesn't work when case is differs",
+  "labels": ["question"],
   "assignees": [1,2]
 }
 
