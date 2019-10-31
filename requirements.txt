@@ -18,4 +18,4 @@ pytest-cov==2.6.1
 pytest-spec==1.1.0
 six==1.12.0
 waitress==1.2.1
-Werkzeug==0.14.1
+Werkzeug==0.15.3
